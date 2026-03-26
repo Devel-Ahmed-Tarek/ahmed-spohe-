@@ -1,6 +1,7 @@
 import { Head } from '@inertiajs/react';
 import type { FormEvent, ReactNode } from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import MarketingLayout from '@/components/marketing/marketing-layout';
 
 function normalizeWhatsappNumber(raw: string): string {
     return raw.replace(/[^\d]/g, '');
@@ -56,7 +57,11 @@ function KitchenAssemblyHero() {
     const ref = useRef<HTMLDivElement | null>(null);
     const [animate, setAnimate] = useState(false);
     const [step, setStep] = useState(0);
-    const [videoOk, setVideoOk] = useState(true);
+    const videoMp4 = String(import.meta.env.VITE_KITCHEN_ASSEMBLY_VIDEO || '');
+    const videoWebm = String(import.meta.env.VITE_KITCHEN_ASSEMBLY_VIDEO_WEBM || '');
+    const videoPoster = String(import.meta.env.VITE_KITCHEN_ASSEMBLY_POSTER || '');
+    const hasVideo = Boolean(videoMp4 || videoWebm);
+    const [videoOk, setVideoOk] = useState(hasVideo);
 
     const steps = useMemo(
         () => [
@@ -223,17 +228,15 @@ function KitchenAssemblyHero() {
                             autoPlay
                             loop
                             preload="metadata"
-                            poster={import.meta.env.VITE_KITCHEN_ASSEMBLY_POSTER || '/videos/kitchen-assembly-poster.jpg'}
+                            poster={videoPoster || undefined}
                             onError={() => setVideoOk(false)}
                         >
-                            <source
-                                src={import.meta.env.VITE_KITCHEN_ASSEMBLY_VIDEO || '/videos/kitchen-assembly.mp4'}
-                                type="video/mp4"
-                            />
-                            <source
-                                src={import.meta.env.VITE_KITCHEN_ASSEMBLY_VIDEO_WEBM || '/videos/kitchen-assembly.webm'}
-                                type="video/webm"
-                            />
+                            {videoMp4 ? (
+                                <source src={videoMp4} type="video/mp4" />
+                            ) : null}
+                            {videoWebm ? (
+                                <source src={videoWebm} type="video/webm" />
+                            ) : null}
                         </video>
                         <div className="k-video-fade" />
                     </>
@@ -502,14 +505,6 @@ export default function Kitchens() {
     const waNumberNormalized = normalizeWhatsappNumber(whatsappNumber);
     const waCanUse = Boolean(waNumberNormalized);
 
-    const nav = [
-        { id: 'how', ar: 'كيف بنشتغل', en: 'How we work' },
-        { id: 'styles', ar: 'الستايلات', en: 'Styles' },
-        { id: 'engineers', ar: 'للمهندسين', en: 'For Engineers' },
-        { id: 'materials', ar: 'الخامات', en: 'Materials' },
-        { id: 'contact', ar: 'تواصل', en: 'Contact' },
-    ];
-
     const whatsappHref = useMemo(() => {
         if (!waCanUse) return '';
 
@@ -534,38 +529,8 @@ export default function Kitchens() {
     return (
         <>
             <Head title="Kitchen" />
-            <div dir="rtl" className="min-h-screen bg-[#F5F5F5] text-[#1B1B18]">
+            <MarketingLayout>
                 <style>{`html { scroll-behavior: smooth; }`}</style>
-
-                <header className="sticky top-0 z-50 bg-[#F5F5F5]/80 backdrop-blur border-b border-[#D9D9D9]">
-                    <div className="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between gap-4">
-                        <div className="flex items-center gap-3">
-                            <div className="h-9 w-9 rounded-xl bg-[#553B1E] grid place-items-center text-[#F5F5F5] font-bold shadow-[0_16px_40px_rgba(85,59,30,0.25)]">
-                                K
-                            </div>
-                            <div className="leading-tight">
-                                <div className="font-extrabold text-[#553B1E] text-sm sm:text-base">
-                                    {companyName}
-                                </div>
-                                <div className="text-[11px] text-[#2B1702] opacity-80">
-                                    {cityName ? `في ${cityName}` : 'Design & Build Kitchens'}
-                                </div>
-                            </div>
-                        </div>
-
-                        <nav className="hidden md:flex items-center gap-6 text-[13px] font-semibold text-[#553B1E]">
-                            {nav.map((item) => (
-                                <a
-                                    key={item.id}
-                                    href={`#${item.id}`}
-                                    className="hover:text-[#A67C52] transition-colors"
-                                >
-                                    {item.ar}
-                                </a>
-                            ))}
-                        </nav>
-                    </div>
-                </header>
 
                 {/* Hero */}
                 <section className="mx-auto max-w-6xl px-4 pt-10 pb-14">
@@ -1054,15 +1019,7 @@ export default function Kitchens() {
                     </div>
                 </section>
 
-                <footer className="pb-10">
-                    <div className="mx-auto max-w-6xl px-4 text-[12px] text-[#2B1702]/70 flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-between">
-                        <div>
-                            © {new Date().getFullYear()} {companyName}. All rights reserved.
-                        </div>
-                        <div dir="ltr">Built for premium kitchens.</div>
-                    </div>
-                </footer>
-            </div>
+            </MarketingLayout>
         </>
     );
 }
