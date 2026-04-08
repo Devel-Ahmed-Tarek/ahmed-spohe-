@@ -137,7 +137,307 @@
         @apply border-border;
     }
 
+    /* يضمن إن الصفحة تقدر تتمرّر بالكامل ومفيش قصّ للمحتوى بسبب ارتفاع غير محدد */
+    html {
+        overflow-x: hidden;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
     body {
-        @apply bg-background text-foreground;
+        @apply bg-background text-foreground antialiased;
+        min-height: 100%;
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+}
+
+/* Marketing — أجواء فاخرة: تدرجات خفيفة، ظلال، انتقالات */
+@layer components {
+    .marketing-site {
+        background-color: #f5f5f5;
+        background-image:
+            radial-gradient(ellipse 120% 70% at 50% -15%, rgba(166, 124, 82, 0.11), transparent 52%),
+            radial-gradient(ellipse 90% 55% at 0% 35%, rgba(85, 59, 30, 0.05), transparent 48%),
+            radial-gradient(ellipse 85% 50% at 100% 55%, rgba(196, 164, 132, 0.08), transparent 50%),
+            linear-gradient(180deg, rgba(255, 255, 255, 0.5) 0%, transparent 28%, transparent 100%);
+        background-attachment: scroll;
+    }
+
+    .marketing-site ::selection {
+        background: rgba(166, 124, 82, 0.28);
+        color: #1b1b18;
+    }
+
+    .marketing-header-bar {
+        background: linear-gradient(
+            180deg,
+            rgba(255, 255, 255, 0.55) 0%,
+            rgba(245, 245, 245, 0.82) 100%
+        );
+        backdrop-filter: blur(14px) saturate(1.15);
+        -webkit-backdrop-filter: blur(14px) saturate(1.15);
+        box-shadow:
+            0 1px 0 rgba(166, 124, 82, 0.12),
+            0 8px 32px -8px rgba(43, 23, 2, 0.06);
+    }
+
+    .marketing-brand-mark {
+        transition:
+            transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+            box-shadow 0.45s ease;
+    }
+
+    .marketing-brand-mark:hover {
+        transform: translateY(-2px) scale(1.02);
+        box-shadow:
+            0 18px 44px rgba(85, 59, 30, 0.32),
+            0 0 0 1px rgba(166, 124, 82, 0.35);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .marketing-brand-mark:hover {
+            transform: none;
+        }
+    }
+
+    .marketing-nav-link {
+        position: relative;
+        padding-bottom: 2px;
+        transition:
+            color 0.35s ease,
+            transform 0.25s ease;
+    }
+
+    .marketing-nav-link::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        right: 0;
+        height: 2px;
+        border-radius: 9999px;
+        background: linear-gradient(90deg, transparent, #a67c52 20%, #c4a484 80%, transparent);
+        transform: scaleX(0);
+        transform-origin: center;
+        opacity: 0.95;
+        transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .marketing-nav-link:hover::after {
+        transform: scaleX(1);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .marketing-nav-link::after {
+            transition: none;
+        }
+    }
+
+    .marketing-site a:focus-visible {
+        outline: 2px solid #a67c52;
+        outline-offset: 3px;
+        border-radius: 6px;
+    }
+
+    @keyframes marketing-shimmer-line {
+        0%,
+        100% {
+            opacity: 0.45;
+        }
+        50% {
+            opacity: 0.85;
+        }
+    }
+
+    .marketing-accent-line {
+        height: 1px;
+        width: 100%;
+        max-width: 5rem;
+        margin-left: auto;
+        margin-right: auto;
+        border-radius: 9999px;
+        background: linear-gradient(90deg, transparent, #a67c52, #c4a484, transparent);
+        animation: marketing-shimmer-line 4s ease-in-out infinite;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .marketing-accent-line {
+            animation: none;
+            opacity: 0.75;
+        }
+    }
+
+    .marketing-accent-line--light {
+        background: linear-gradient(
+            90deg,
+            transparent,
+            rgba(166, 124, 82, 0.75),
+            rgba(248, 184, 3, 0.45),
+            transparent
+        );
+        opacity: 0.95;
+    }
+
+    .marketing-hero-frame {
+        box-shadow:
+            0 44px 110px -32px rgba(43, 23, 2, 0.28),
+            0 0 0 1px rgba(166, 124, 82, 0.22),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+
+    .marketing-section-ivory {
+        background: linear-gradient(
+            180deg,
+            #ffffff 0%,
+            rgba(252, 251, 249, 0.98) 45%,
+            rgba(245, 245, 245, 0.96) 100%
+        );
+    }
+
+    .marketing-card-glass {
+        border: 1px solid rgba(217, 217, 217, 0.65);
+        box-shadow: 0 12px 36px -14px rgba(43, 23, 2, 0.09);
+        transition:
+            transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+            box-shadow 0.4s ease,
+            border-color 0.35s ease;
+    }
+
+    .marketing-card-glass:hover {
+        transform: translateY(-3px);
+        box-shadow:
+            0 24px 56px -14px rgba(85, 59, 30, 0.14),
+            0 0 0 1px rgba(166, 124, 82, 0.2);
+        border-color: rgba(166, 124, 82, 0.35);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .marketing-card-glass:hover {
+            transform: none;
+        }
+    }
+
+    /* Marketing pages: keep ~5% side gutters on large screens */
+    .marketing-site .max-w-6xl {
+        width: 95% !important;
+        max-width: 95% !important;
+    }
+
+    @media (min-width: 1280px) {
+        .marketing-site .max-w-6xl {
+            width: 90% !important;
+            max-width: 90% !important;
+        }
+    }
+
+    /* Scroll reveal (home & marketing sections) */
+    .marketing-reveal {
+        opacity: 0;
+        transform: translate3d(0, 28px, 0);
+        transition:
+            opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+            transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        will-change: opacity, transform;
+    }
+
+    .marketing-reveal.marketing-reveal-visible {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .marketing-reveal {
+            opacity: 1;
+            transform: none;
+            transition: none;
+            will-change: auto;
+        }
+    }
+
+    /* Hero: stagger on first paint */
+    @keyframes marketing-hero-fade-up {
+        from {
+            opacity: 0;
+            transform: translate3d(0, 22px, 0);
+        }
+        to {
+            opacity: 1;
+            transform: translate3d(0, 0, 0);
+        }
+    }
+
+    .marketing-hero-animate .mh-badge {
+        animation: marketing-hero-fade-up 0.58s cubic-bezier(0.22, 1, 0.36, 1) 0.06s both;
+    }
+
+    .marketing-hero-animate .mh-title {
+        animation: marketing-hero-fade-up 0.62s cubic-bezier(0.22, 1, 0.36, 1) 0.14s both;
+    }
+
+    .marketing-hero-animate .mh-sub {
+        animation: marketing-hero-fade-up 0.62s cubic-bezier(0.22, 1, 0.36, 1) 0.22s both;
+    }
+
+    .marketing-hero-animate .mh-cta {
+        animation: marketing-hero-fade-up 0.62s cubic-bezier(0.22, 1, 0.36, 1) 0.3s both;
+    }
+
+    .marketing-hero-animate .mh-dots {
+        animation: marketing-hero-fade-up 0.58s cubic-bezier(0.22, 1, 0.36, 1) 0.38s both;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .marketing-hero-animate .mh-badge,
+        .marketing-hero-animate .mh-title,
+        .marketing-hero-animate .mh-sub,
+        .marketing-hero-animate .mh-cta,
+        .marketing-hero-animate .mh-dots {
+            animation: none;
+            opacity: 1;
+            transform: none;
+        }
+    }
+
+    /* Hero background: subtle zoom on active slide */
+    @keyframes marketing-hero-ken {
+        0% {
+            transform: scale(1.07);
+        }
+        100% {
+            transform: scale(1.02);
+        }
+    }
+
+    .marketing-hero-slide-img.is-active {
+        animation: marketing-hero-ken 11s ease-out forwards;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .marketing-hero-slide-img.is-active {
+            animation: none;
+        }
+    }
+
+    /* Hero slider: circular progress ring (synced with slide interval via --hero-slide-ms) */
+    @keyframes marketing-hero-dot-ring {
+        from {
+            stroke-dashoffset: var(--hero-ring-len, 100.53);
+        }
+        to {
+            stroke-dashoffset: 0;
+        }
+    }
+
+    .marketing-hero-dot-ring {
+        transform-origin: center;
+        animation: marketing-hero-dot-ring var(--hero-slide-ms, 6500ms) linear forwards;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .marketing-hero-dot-ring {
+            animation: none;
+            stroke-dashoffset: 0 !important;
+        }
     }
 }

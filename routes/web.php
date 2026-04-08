@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::inertia('/', 'kitchens')->name('home');
+Route::inertia('/', 'home')->name('home');
 Route::inertia('about', 'about')->name('about');
 Route::inertia('services', 'services')->name('services');
 Route::inertia('gallery', 'gallery')->name('gallery');
