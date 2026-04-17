@@ -1,16 +1,18 @@
-import AppLogoIcon from '@/components/app-logo-icon';
+import { usePage } from '@inertiajs/react';
 
+/**
+ * Dashboard brand mark: site logo from Site configuration, or INTERA wordmark in /images/intera.svg.
+ */
 export default function AppLogo() {
+    const { props } = usePage<{ siteConfig?: Record<string, string | null> }>();
+    const fromSettings = props.siteConfig?.logo?.trim() || '';
+    const src = fromSettings || '/images/intera.svg';
+
     return (
-        <>
-            <div className="flex aspect-square size-8 items-center justify-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground">
-                <AppLogoIcon className="size-5 fill-current text-white dark:text-black" />
-            </div>
-            <div className="ml-1 grid flex-1 text-left text-sm">
-                <span className="mb-0.5 truncate leading-tight font-semibold">
-                    Laravel Starter Kit
-                </span>
-            </div>
-        </>
+        <img
+            src={src}
+            alt=""
+            className="h-8 w-auto max-h-8 max-w-[min(100%,9rem)] shrink-0 object-contain object-left dark:brightness-110"
+        />
     );
 }

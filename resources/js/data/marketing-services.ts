@@ -1,4 +1,6 @@
 export type MarketingService = {
+    /** موجود عند الجلب من لوحة التحكم */
+    id?: number;
     ar: string;
     en: string;
     descAr: string;

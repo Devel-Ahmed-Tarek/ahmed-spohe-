@@ -2,6 +2,7 @@ import { Head } from '@inertiajs/react';
 import type { FormEvent, ReactNode } from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import MarketingLayout from '@/components/marketing/marketing-layout';
+import { useSiteConfig } from '@/hooks/use-site-config';
 
 function normalizeWhatsappNumber(raw: string): string {
     return raw.replace(/[^\d]/g, '');
@@ -486,9 +487,7 @@ function KitchenAssemblyHero() {
 }
 
 export default function Kitchens() {
-    const companyName = import.meta.env.VITE_COMPANY_NAME || 'Ahmed Sophe';
-    const cityName = import.meta.env.VITE_CITY_NAME || '';
-    const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '';
+    const { whatsappNumber, waCanUse } = useSiteConfig();
 
     const [propertyType, setPropertyType] = useState<'شقة' | 'فيلا' | 'أي مشروع'>('شقة');
     const [name, setName] = useState('');
@@ -503,7 +502,6 @@ export default function Kitchens() {
     }, [submitState]);
 
     const waNumberNormalized = normalizeWhatsappNumber(whatsappNumber);
-    const waCanUse = Boolean(waNumberNormalized);
 
     const whatsappHref = useMemo(() => {
         if (!waCanUse) return '';
@@ -1010,8 +1008,7 @@ export default function Kitchens() {
 
                                 {!waCanUse && (
                                     <div className="mt-4 rounded-2xl border border-[#D9D9D9] bg-[#F5F5F5] p-4 text-[12px] text-[#2B1702]/80">
-                                        لإظهار زر واتساب بشكل فعلي، حدّث قيمة `VITE_WHATSAPP_NUMBER` في ملف
-                                        <span className="font-semibold"> .env</span> أو <span className="font-semibold">.env.example</span>.
+                                        لإظهار زر واتساب، أضف رقم واتساب من لوحة التحكم في «إعدادات الموقع».
                                     </div>
                                 )}
                             </form>

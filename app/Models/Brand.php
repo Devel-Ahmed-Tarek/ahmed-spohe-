@@ -1,0 +1,23 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Brand extends Model
+{
+    /**
+     * @var list<string>
+     */
+    protected $fillable = [
+        'name',
+        'logo',
+        'hint',
+        'sort_order',
+        'is_active',
+    ];
+
+    protected $casts = [
+        'is_active' => 'boolean',
+    ];
+}

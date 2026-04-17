@@ -1,6 +1,8 @@
 import type { ReactNode } from 'react';
-import { Link } from '@inertiajs/react';
-import { Menu } from 'lucide-react';
+import { Link, router } from '@inertiajs/react';
+import { Facebook, Instagram, Linkedin, Menu, Youtube } from 'lucide-react';
+import { useCms } from '@/hooks/use-cms';
+import { useSiteConfig } from '@/hooks/use-site-config';
 
 import {
     Sheet,
@@ -19,38 +21,53 @@ export default function MarketingLayout({
     /** يُستخدم في الصفحة الرئيسية عند وجود فوتر مخصص كامل */
     hideDefaultFooter?: boolean;
 }) {
+    const { locale, t } = useCms();
+    const isEn = locale === 'en';
+    const { logoUrl, facebookUrl, instagramUrl, youtubeUrl, tiktokUrl, linkedinUrl } = useSiteConfig();
+
+    const socialEntries = [
+        { href: facebookUrl, label: 'Facebook', Icon: Facebook },
+        { href: instagramUrl, label: 'Instagram', Icon: Instagram },
+        { href: youtubeUrl, label: 'YouTube', Icon: Youtube },
+        { href: linkedinUrl, label: 'LinkedIn', Icon: Linkedin },
+    ].filter((e) => e.href.trim() !== '');
+
+    const tiktokHref = tiktokUrl.trim();
+
     const nav = [
-        { href: '/', ar: 'الرئيسية', en: 'Home' },
-        { href: '/about', ar: 'عن الشركة', en: 'About' },
-        { href: '/services', ar: 'الخدمات', en: 'Services' },
-        { href: '/gallery', ar: 'المعرض', en: 'Gallery' },
-        { href: '/process', ar: 'طريقة العمل', en: 'Process' },
-        { href: '/engineers', ar: 'للمهندسين', en: 'Engineers' },
-        { href: '/contact', ar: 'تواصل', en: 'Contact' },
+        { href: '/', label: t('nav.home', 'الرئيسية', 'Home') },
+        { href: '/about', label: t('nav.about', 'عن الشركة', 'About') },
+        { href: '/services', label: t('nav.services', 'الخدمات', 'Services') },
+        { href: '/gallery', label: t('nav.gallery', 'المعرض', 'Gallery') },
+        { href: '/process', label: t('nav.process', 'طريقة العمل', 'Process') },
+        { href: '/engineers', label: t('nav.engineers', 'للمهندسين', 'Engineers') },
+        { href: '/contact', label: t('nav.contact', 'تواصل', 'Contact') },
     ];
 
     return (
         <div
-            dir="rtl"
+            dir={isEn ? 'ltr' : 'rtl'}
             className="marketing-site flex min-h-screen min-h-[100dvh] flex-col text-[#1B1B18]"
         >
             <header className="marketing-header-bar sticky top-0 z-50 shrink-0 border-b border-[#D9D9D9]/70">
                 <div className="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-3">
-                        <div className="marketing-brand-mark h-9 w-9 rounded-xl bg-[#553B1E] grid place-items-center text-[#F5F5F5] font-bold shadow-[0_16px_40px_rgba(85,59,30,0.25)]">
-                            K
-                        </div>
-                        <div className="leading-tight">
-                            <div className="font-extrabold text-[#553B1E] text-sm sm:text-base">
-                                {String(
-                                    import.meta.env.VITE_COMPANY_NAME || 'Ahmed Sophe',
-                                )}
+                    <Link
+                        href="/"
+                        className="flex min-w-0 shrink items-center"
+                        aria-label={t('nav.home', 'الرئيسية', 'Home')}
+                    >
+                        {logoUrl ? (
+                            <img
+                                src={logoUrl}
+                                alt=""
+                                className="h-10 w-auto max-h-12 max-w-[min(100%,16rem)] object-contain object-start sm:h-11"
+                            />
+                        ) : (
+                            <div className="marketing-brand-mark h-10 w-10 shrink-0 rounded-xl bg-[#553B1E] grid place-items-center text-[#F5F5F5] text-sm font-bold shadow-[0_16px_40px_rgba(85,59,30,0.25)] sm:h-11 sm:w-11">
+                                K
                             </div>
-                            <div className="text-[11px] text-[#2B1702] opacity-80">
-                                {String(import.meta.env.VITE_CITY_NAME || '')}
-                            </div>
-                        </div>
-                    </div>
+                        )}
+                    </Link>
 
                     <nav className="hidden md:flex items-center gap-7 text-[13px] font-semibold text-[#553B1E]">
                         {nav.map((item) => (
@@ -59,10 +76,19 @@ export default function MarketingLayout({
                                 href={item.href}
                                 className="marketing-nav-link hover:text-[#A67C52]"
                             >
-                                <span className="block tracking-tight">{item.ar}</span>
+                                <span className="block tracking-tight">{item.label}</span>
                             </Link>
                         ))}
                     </nav>
+                    <button
+                        type="button"
+                        onClick={() =>
+                            router.post(`/locale/${isEn ? 'ar' : 'en'}`, {}, { preserveScroll: true })
+                        }
+                        className="hidden md:inline-flex items-center justify-center rounded-xl border border-[#D9D9D9] bg-white px-3 py-2 text-xs font-semibold text-[#553B1E]"
+                    >
+                        {isEn ? 'AR' : 'EN'}
+                    </button>
 
                     <div className="flex items-center gap-2 md:hidden">
                         <Sheet>
@@ -94,24 +120,27 @@ export default function MarketingLayout({
                                                 href={item.href}
                                                 className="rounded-xl px-3 py-3 text-[15px] font-semibold text-[#553B1E] transition hover:bg-white/90 hover:text-[#A67C52]"
                                             >
-                                                <span className="block">{item.ar}</span>
-                                                <span
-                                                    className="mt-0.5 block text-[11px] font-medium text-[#2B1702]/45"
-                                                    dir="ltr"
-                                                >
-                                                    {item.en}
-                                                </span>
+                                                <span className="block">{item.label}</span>
                                             </Link>
                                         </SheetClose>
                                     ))}
                                 </nav>
                             </SheetContent>
                         </Sheet>
+                        <button
+                            type="button"
+                            onClick={() =>
+                                router.post(`/locale/${isEn ? 'ar' : 'en'}`, {}, { preserveScroll: true })
+                            }
+                            className="inline-flex items-center justify-center rounded-xl border border-[#D9D9D9] bg-white px-3 py-2 text-xs font-semibold text-[#553B1E]"
+                        >
+                            {isEn ? 'AR' : 'EN'}
+                        </button>
                         <Link
                             href="/contact"
                             className="inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-semibold bg-gradient-to-br from-[#C4A484] via-[#A67C52] to-[#8f6844] text-[#1B1B18] shadow-[0_10px_28px_rgba(85,59,30,0.22)] hover:brightness-[1.04] active:scale-[0.98] transition-all duration-300"
                         >
-                            تواصل
+                            {t('nav.contact', 'تواصل', 'Contact')}
                         </Link>
                     </div>
                 </div>
@@ -123,13 +152,46 @@ export default function MarketingLayout({
 
             {!hideDefaultFooter && (
                 <footer className="shrink-0 pb-10 pt-2">
-                    <div className="mx-auto max-w-6xl px-4 text-[12px] text-[#2B1702]/70 flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-between">
-                        <div>
-                            © {new Date().getFullYear()}{' '}
-                            {String(import.meta.env.VITE_COMPANY_NAME || 'Ahmed Sophe')}. All rights
-                            reserved.
+                    <div className="mx-auto max-w-6xl px-4 flex flex-col gap-3 text-[12px] text-[#2B1702]/70">
+                        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                            <div>
+                                © {new Date().getFullYear()}{' '}
+                                {t('home.footer.rights', 'جميع الحقوق محفوظة.', 'All rights reserved.')}
+                            </div>
+                            <div dir="ltr">
+                                {t('footer.tagline', 'مطابخ فاخرة', 'Premium kitchens • Built to assemble')}
+                            </div>
                         </div>
-                        <div dir="ltr">Premium kitchens • Built to assemble</div>
+                        {(socialEntries.length > 0 || tiktokHref) && (
+                            <div
+                                className="flex flex-wrap items-center justify-center gap-4 sm:justify-end border-t border-[#D9D9D9]/60 pt-3"
+                                dir="ltr"
+                            >
+                                {socialEntries.map(({ href, label, Icon }) => (
+                                    <a
+                                        key={label}
+                                        href={href}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-[#553B1E] transition hover:text-[#A67C52]"
+                                        aria-label={label}
+                                    >
+                                        <Icon className="size-5" strokeWidth={2} />
+                                    </a>
+                                ))}
+                                {tiktokHref ? (
+                                    <a
+                                        href={tiktokHref}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-[11px] font-bold uppercase tracking-wide text-[#553B1E] transition hover:text-[#A67C52]"
+                                        aria-label="TikTok"
+                                    >
+                                        TikTok
+                                    </a>
+                                ) : null}
+                            </div>
+                        )}
                     </div>
                 </footer>
             )}
