@@ -1,12 +1,13 @@
 <?php
 
-use App\Http\Controllers\Admin\SiteContentController;
 use App\Http\Controllers\Admin\BrandController;
-use App\Http\Controllers\Admin\HeroSlideController;
-use App\Http\Controllers\Admin\GalleryItemController;
-use App\Http\Controllers\Admin\SiteServiceController;
 use App\Http\Controllers\Admin\ContactRequestController;
+use App\Http\Controllers\Admin\GalleryCategoryController;
+use App\Http\Controllers\Admin\GalleryItemController;
+use App\Http\Controllers\Admin\HeroSlideController;
 use App\Http\Controllers\Admin\SiteConfigurationController;
+use App\Http\Controllers\Admin\SiteContentController;
+use App\Http\Controllers\Admin\SiteServiceController;
 use App\Http\Controllers\ContactSubmissionController;
 use Illuminate\Support\Facades\Route;
 
@@ -21,6 +22,7 @@ Route::post('contact-requests', [ContactSubmissionController::class, 'store'])->
 Route::post('locale/{locale}', function (string $locale) {
     abort_unless(in_array($locale, ['ar', 'en'], true), 404);
     session(['locale' => $locale]);
+
     return back();
 })->name('locale.switch');
 
@@ -43,6 +45,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('dashboard/site-services', [SiteServiceController::class, 'store'])->name('dashboard.site-services.store');
     Route::post('dashboard/site-services/{siteService}', [SiteServiceController::class, 'update'])->name('dashboard.site-services.update');
     Route::delete('dashboard/site-services/{siteService}', [SiteServiceController::class, 'destroy'])->name('dashboard.site-services.destroy');
+    Route::post('dashboard/gallery/categories', [GalleryCategoryController::class, 'store'])->name('dashboard.gallery.categories.store');
+    Route::post('dashboard/gallery/categories/{galleryCategory}', [GalleryCategoryController::class, 'update'])->name('dashboard.gallery.categories.update');
+    Route::delete('dashboard/gallery/categories/{galleryCategory}', [GalleryCategoryController::class, 'destroy'])->name('dashboard.gallery.categories.destroy');
     Route::get('dashboard/gallery', [GalleryItemController::class, 'index'])->name('dashboard.gallery.index');
     Route::post('dashboard/gallery', [GalleryItemController::class, 'store'])->name('dashboard.gallery.store');
     Route::post('dashboard/gallery/{galleryItem}', [GalleryItemController::class, 'update'])->name('dashboard.gallery.update');
@@ -53,4 +58,3 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 require __DIR__.'/settings.php';
-

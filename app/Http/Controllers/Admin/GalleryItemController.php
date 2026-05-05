@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\GalleryCategory;
 use App\Models\GalleryItem;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -14,7 +16,15 @@ class GalleryItemController extends Controller
 {
     public function index(): Response
     {
+        $categories = Schema::hasTable('gallery_categories')
+            ? GalleryCategory::query()
+                ->orderBy('sort_order')
+                ->orderBy('id')
+                ->get()
+            : collect();
+
         return Inertia::render('dashboard/gallery-items-index', [
+            'categories' => $categories,
             'items' => GalleryItem::query()
                 ->orderBy('sort_order')
                 ->orderBy('id')
@@ -27,10 +37,14 @@ class GalleryItemController extends Controller
         $request->merge([
             'home_position' => $this->normalizeNullableHomePosition($request->input('home_position')),
             'engineer_home_position' => $this->normalizeNullableEngineerHomePosition($request->input('engineer_home_position')),
+            'gallery_category_id' => $request->filled('gallery_category_id')
+                ? (int) $request->input('gallery_category_id')
+                : null,
         ]);
 
         $validated = $request->validate([
             'image' => ['required', 'file', 'max:8192', 'mimes:jpeg,jpg,png,webp,gif'],
+            'gallery_category_id' => ['nullable', 'integer', 'exists:gallery_categories,id'],
             'label_ar' => ['nullable', 'string', 'max:255'],
             'label_en' => ['nullable', 'string', 'max:255'],
             'tagline_ar' => ['nullable', 'string', 'max:255'],
@@ -54,6 +68,7 @@ class GalleryItemController extends Controller
         $stored = $request->file('image')->store('gallery', 'public');
 
         GalleryItem::query()->create([
+            'gallery_category_id' => $validated['gallery_category_id'] ?? null,
             'image' => '/storage/'.$stored,
             'label_ar' => $validated['label_ar'] ?? null,
             'label_en' => $validated['label_en'] ?? null,
@@ -73,11 +88,15 @@ class GalleryItemController extends Controller
         $request->merge([
             'home_position' => $this->normalizeNullableHomePosition($request->input('home_position')),
             'engineer_home_position' => $this->normalizeNullableEngineerHomePosition($request->input('engineer_home_position')),
+            'gallery_category_id' => $request->filled('gallery_category_id')
+                ? (int) $request->input('gallery_category_id')
+                : null,
         ]);
 
         $validated = $request->validate([
             'image' => ['nullable', 'file', 'max:8192', 'mimes:jpeg,jpg,png,webp,gif'],
             'image_current' => ['nullable', 'string', 'max:500'],
+            'gallery_category_id' => ['nullable', 'integer', 'exists:gallery_categories,id'],
             'label_ar' => ['nullable', 'string', 'max:255'],
             'label_en' => ['nullable', 'string', 'max:255'],
             'tagline_ar' => ['nullable', 'string', 'max:255'],
@@ -109,6 +128,7 @@ class GalleryItemController extends Controller
         }
 
         $galleryItem->update([
+            'gallery_category_id' => $validated['gallery_category_id'] ?? null,
             'image' => $image,
             'label_ar' => $validated['label_ar'] ?? null,
             'label_en' => $validated['label_en'] ?? null,

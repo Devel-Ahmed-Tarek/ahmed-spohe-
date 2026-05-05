@@ -1,7 +1,8 @@
 import { Head, usePage } from '@inertiajs/react';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import MarketingLayout from '@/components/marketing/marketing-layout';
 import { useCms } from '@/hooks/use-cms';
+import { cn } from '@/lib/utils';
 
 const defaultGalleryImages = [
     '/images/projects/kitchen-01.png',
@@ -17,6 +18,13 @@ const defaultGalleryImages = [
     '/images/projects/kitchen-11.png',
 ];
 
+type GalleryCategory = {
+    id: number;
+    nameAr: string;
+    nameEn: string;
+    slug: string;
+};
+
 type GalleryCard = {
     id: number;
     image: string;
@@ -24,11 +32,13 @@ type GalleryCard = {
     labelEn: string | null;
     taglineAr: string | null;
     taglineEn: string | null;
+    category: GalleryCategory | null;
 };
 
 export default function Gallery() {
     const { t, locale } = useCms();
     const { props } = usePage<{
+        galleryCategories?: GalleryCategory[];
         galleryItems?: Array<{
             id: number;
             image: string;
@@ -36,8 +46,11 @@ export default function Gallery() {
             labelEn: string | null;
             taglineAr: string | null;
             taglineEn: string | null;
+            category?: GalleryCategory | null;
         }>;
     }>();
+
+    const [activeCategoryId, setActiveCategoryId] = useState<number | 'all'>('all');
 
     const cards = useMemo<GalleryCard[]>(() => {
         const rows = props.galleryItems ?? [];
@@ -50,6 +63,7 @@ export default function Gallery() {
                 labelEn: g.labelEn,
                 taglineAr: g.taglineAr,
                 taglineEn: g.taglineEn,
+                category: g.category ?? null,
             }));
         if (fromDb.length > 0) {
             return fromDb;
@@ -61,8 +75,18 @@ export default function Gallery() {
             labelEn: null,
             taglineAr: null,
             taglineEn: null,
+            category: null,
         }));
     }, [props.galleryItems]);
+
+    const categories = props.galleryCategories ?? [];
+
+    const filteredCards = useMemo(() => {
+        if (activeCategoryId === 'all') {
+            return cards;
+        }
+        return cards.filter((c) => c.category?.id === activeCategoryId);
+    }, [cards, activeCategoryId]);
 
     const dir = locale === 'en' ? 'ltr' : 'rtl';
 
@@ -84,8 +108,57 @@ export default function Gallery() {
                         </p>
                     </div>
 
-                    <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {cards.map((item, idx) => {
+                    {categories.length > 0 ? (
+                        <div className="mt-8" dir={dir}>
+                            <p className="text-[12px] font-semibold uppercase tracking-wider text-[#553B1E]/75">
+                                {t('gallery.filter.hint', 'صفّي المشاريع حسب التصنيف.', 'Filter projects by category.')}
+                            </p>
+                            <div
+                                className="mt-3 flex flex-wrap gap-2"
+                                role="tablist"
+                                aria-label={t('gallery.page.title', 'المعرض', 'Gallery')}
+                            >
+                                <button
+                                    type="button"
+                                    role="tab"
+                                    aria-selected={activeCategoryId === 'all'}
+                                    onClick={() => setActiveCategoryId('all')}
+                                    className={cn(
+                                        'rounded-full border px-4 py-2 text-[13px] font-semibold transition',
+                                        activeCategoryId === 'all'
+                                            ? 'border-[#A67C52] bg-[#553B1E] text-[#F5F5F5] shadow-[0_8px_24px_rgba(85,59,30,0.22)]'
+                                            : 'border-[#D9D9D9] bg-white/90 text-[#553B1E] hover:border-[#A67C52]/5',
+                                    )}
+                                >
+                                    {t('gallery.filter.all', 'الكل', 'All')}
+                                </button>
+                                {categories.map((cat) => {
+                                    const label =
+                                        locale === 'en' ? cat.nameEn || cat.nameAr : cat.nameAr || cat.nameEn;
+                                    return (
+                                        <button
+                                            key={cat.id}
+                                            type="button"
+                                            role="tab"
+                                            aria-selected={activeCategoryId === cat.id}
+                                            onClick={() => setActiveCategoryId(cat.id)}
+                                            className={cn(
+                                                'rounded-full border px-4 py-2 text-[13px] font-semibold transition',
+                                                activeCategoryId === cat.id
+                                                    ? 'border-[#A67C52] bg-[#553B1E] text-[#F5F5F5] shadow-[0_8px_24px_rgba(85,59,30,0.22)]'
+                                                    : 'border-[#D9D9D9] bg-white/90 text-[#553B1E] hover:border-[#A67C52]/5',
+                                            )}
+                                        >
+                                            {label}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    ) : null}
+
+                    <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                        {filteredCards.map((item, idx) => {
                             const n = idx + 1;
                             const pad = String(n).padStart(2, '0');
                             const fbProject = t('gallery.fallback.project', 'مشروع', 'Project');
@@ -109,10 +182,16 @@ export default function Gallery() {
                             const tagline = primaryTagline || fbTagline;
                             const alt = primaryLabel || `${fbProject} ${n}`;
 
+                            const catLabel =
+                                item.category &&
+                                (locale === 'en'
+                                    ? item.category.nameEn || item.category.nameAr
+                                    : item.category.nameAr || item.category.nameEn);
+
                             return (
                                 <div
                                     key={item.id}
-                                    className="rounded-3xl bg-white/80 border border-[#D9D9D9] overflow-hidden"
+                                    className="overflow-hidden rounded-3xl border border-[#D9D9D9] bg-white/80"
                                 >
                                     <img
                                         src={item.image}
@@ -120,6 +199,11 @@ export default function Gallery() {
                                         className="h-52 w-full object-cover"
                                     />
                                     <div className="p-5" dir={dir}>
+                                        {catLabel ? (
+                                            <div className="mb-2 inline-block rounded-full border border-[#A67C52]/35 bg-[#F5F5F5]/90 px-2.5 py-0.5 text-[11px] font-bold text-[#553B1E]">
+                                                {catLabel}
+                                            </div>
+                                        ) : null}
                                         <div className="font-black text-[#2B1702]">{title}</div>
                                         <div className="mt-1 text-[12px] text-[#2B1702]/70">{tagline}</div>
                                     </div>
@@ -127,6 +211,16 @@ export default function Gallery() {
                             );
                         })}
                     </div>
+
+                    {filteredCards.length === 0 ? (
+                        <p className="mt-8 text-center text-sm text-[#2B1702]/70" dir={dir}>
+                            {t(
+                                'gallery.filter.empty',
+                                'لا توجد مشاريع في هذا التصنيف.',
+                                'No projects in this category.',
+                            )}
+                        </p>
+                    ) : null}
                 </section>
             </MarketingLayout>
         </>

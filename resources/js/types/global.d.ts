@@ -29,6 +29,13 @@ type MarketingServiceEntry = {
     imageAlt: string;
 };
 
+type GalleryCategoryEntry = {
+    id: number;
+    nameAr: string;
+    nameEn: string;
+    slug: string;
+};
+
 type GalleryItemEntry = {
     id: number;
     image: string;
@@ -38,6 +45,7 @@ type GalleryItemEntry = {
     taglineEn: string | null;
     homePosition: number | null;
     engineerHomePosition: number | null;
+    category: GalleryCategoryEntry | null;
 };
 
 declare module '@inertiajs/core' {
@@ -54,6 +62,7 @@ declare module '@inertiajs/core' {
             heroSlides: HeroSlideEntry[];
             brands: BrandEntry[];
             marketingServices: MarketingServiceEntry[];
+            galleryCategories: GalleryCategoryEntry[];
             galleryItems: GalleryItemEntry[];
             siteConfig: Record<string, string | null>;
             [key: string]: unknown;

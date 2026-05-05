@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class GalleryItem extends Model
 {
@@ -10,6 +11,7 @@ class GalleryItem extends Model
      * @var list<string>
      */
     protected $fillable = [
+        'gallery_category_id',
         'image',
         'label_ar',
         'label_en',
@@ -24,4 +26,9 @@ class GalleryItem extends Model
     protected $casts = [
         'is_active' => 'boolean',
     ];
+
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(GalleryCategory::class, 'gallery_category_id');
+    }
 }

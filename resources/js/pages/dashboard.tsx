@@ -78,7 +78,7 @@ export default function Dashboard() {
                     <div className="rounded-xl border border-sidebar-border/70 bg-background p-5">
                         <h2 className="text-lg font-semibold">Gallery</h2>
                         <p className="mt-2 text-sm text-muted-foreground">
-                            Manage photos on the public gallery page.
+                            Categories, photos, and home page spotlight slots for the public gallery.
                         </p>
                         <Link
                             href="/dashboard/gallery"

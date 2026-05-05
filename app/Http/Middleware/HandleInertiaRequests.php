@@ -3,11 +3,12 @@
 namespace App\Http\Middleware;
 
 use App\Models\Brand;
+use App\Models\GalleryCategory;
 use App\Models\GalleryItem;
 use App\Models\HeroSlide;
 use App\Models\SiteContent;
-use App\Models\SiteSetting;
 use App\Models\SiteService;
+use App\Models\SiteSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 use Inertia\Middleware;
@@ -105,22 +106,50 @@ class HandleInertiaRequests extends Middleware
                     ->values()
                     ->all()
                 : [],
-            'galleryItems' => fn (): array => Schema::hasTable('gallery_items')
-                ? GalleryItem::query()
+            'galleryCategories' => fn (): array => Schema::hasTable('gallery_categories')
+                ? GalleryCategory::query()
                     ->where('is_active', true)
                     ->orderBy('sort_order')
                     ->orderBy('id')
                     ->get()
-                    ->map(fn (GalleryItem $g): array => [
-                        'id' => $g->id,
-                        'image' => $g->image,
-                        'labelAr' => $g->label_ar,
-                        'labelEn' => $g->label_en,
-                        'taglineAr' => $g->tagline_ar,
-                        'taglineEn' => $g->tagline_en,
-                        'homePosition' => $g->home_position,
-                        'engineerHomePosition' => $g->engineer_home_position,
+                    ->map(fn (GalleryCategory $c): array => [
+                        'id' => $c->id,
+                        'nameAr' => $c->name_ar,
+                        'nameEn' => $c->name_en,
+                        'slug' => $c->slug,
                     ])
+                    ->values()
+                    ->all()
+                : [],
+            'galleryItems' => fn (): array => Schema::hasTable('gallery_items')
+                ? GalleryItem::query()
+                    ->with('category')
+                    ->where('is_active', true)
+                    ->orderBy('sort_order')
+                    ->orderBy('id')
+                    ->get()
+                    ->map(function (GalleryItem $g): array {
+                        $c = $g->category;
+
+                        return [
+                            'id' => $g->id,
+                            'image' => $g->image,
+                            'labelAr' => $g->label_ar,
+                            'labelEn' => $g->label_en,
+                            'taglineAr' => $g->tagline_ar,
+                            'taglineEn' => $g->tagline_en,
+                            'homePosition' => $g->home_position,
+                            'engineerHomePosition' => $g->engineer_home_position,
+                            'category' => $c
+                                ? [
+                                    'id' => $c->id,
+                                    'nameAr' => $c->name_ar,
+                                    'nameEn' => $c->name_en,
+                                    'slug' => $c->slug,
+                                ]
+                                : null,
+                        ];
+                    })
                     ->values()
                     ->all()
                 : [],

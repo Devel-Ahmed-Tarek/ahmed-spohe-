@@ -295,6 +295,12 @@ export default function Home() {
             taglineEn: string | null;
             homePosition: number | null;
             engineerHomePosition: number | null;
+            category?: {
+                id: number;
+                nameAr: string;
+                nameEn: string;
+                slug: string;
+            } | null;
         }>;
     }>();
 

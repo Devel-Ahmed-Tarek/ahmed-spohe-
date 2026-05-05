@@ -209,4 +209,7 @@ return [
     ['group' => 'gallery', 'key' => 'gallery.page.lead', 'value_ar' => 'استايلات وتشطيبات تناسب الشقق والفلل — مجموعة صور من نماذج مطابخ متنوعة.', 'value_en' => 'Styles and finishes for apartments and villas — a selection of kitchen showcases.'],
     ['group' => 'gallery', 'key' => 'gallery.fallback.project', 'value_ar' => 'مشروع', 'value_en' => 'Project'],
     ['group' => 'gallery', 'key' => 'gallery.fallback.tagline', 'value_ar' => 'مودرن / تشطيب فاخر', 'value_en' => 'Modern / Premium finish'],
+    ['group' => 'gallery', 'key' => 'gallery.filter.all', 'value_ar' => 'الكل', 'value_en' => 'All'],
+    ['group' => 'gallery', 'key' => 'gallery.filter.hint', 'value_ar' => 'صفّي المشاريع حسب التصنيف.', 'value_en' => 'Filter projects by category.'],
+    ['group' => 'gallery', 'key' => 'gallery.filter.empty', 'value_ar' => 'لا توجد مشاريع في هذا التصنيف.', 'value_en' => 'No projects in this category.'],
 ];

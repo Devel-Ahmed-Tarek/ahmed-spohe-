@@ -3,8 +3,19 @@ import { useRef } from 'react';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
 
+type GalleryCategoryRow = {
+    id: number;
+    name_ar: string;
+    name_en: string;
+    slug: string;
+    sort_order: number;
+    is_active: boolean;
+    updated_at: string;
+};
+
 type GalleryRow = {
     id: number;
+    gallery_category_id: number | null;
     image: string;
     label_ar: string | null;
     label_en: string | null;
@@ -18,6 +29,7 @@ type GalleryRow = {
 };
 
 type PageProps = {
+    categories: GalleryCategoryRow[];
     items: GalleryRow[];
     flash?: {
         success?: string;
@@ -85,11 +97,203 @@ function EngineerSpotlightSelect({
     );
 }
 
-function GalleryRowForm({ item }: { item: GalleryRow }) {
+function CategorySelect({
+    categories,
+    value,
+    onChange,
+    className,
+}: {
+    categories: GalleryCategoryRow[];
+    value: string | number;
+    onChange: (v: string) => void;
+    className?: string;
+}) {
+    const v = value === '' || value === null || value === undefined ? '' : String(value);
+    return (
+        <label className={className}>
+            <span className="mb-1 block text-muted-foreground">Gallery category (optional)</span>
+            <select
+                value={v}
+                onChange={(e) => onChange(e.target.value)}
+                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+            >
+                <option value="">— No category —</option>
+                {categories.map((c) => (
+                    <option key={c.id} value={String(c.id)}>
+                        {c.name_ar} / {c.name_en}
+                    </option>
+                ))}
+            </select>
+        </label>
+    );
+}
+
+function CategoryRowForm({ item }: { item: GalleryCategoryRow }) {
+    const form = useForm({
+        name_ar: item.name_ar,
+        name_en: item.name_en,
+        slug: item.slug,
+        sort_order: item.sort_order,
+        is_active: item.is_active,
+    });
+    const deleteForm = useForm({});
+
+    return (
+        <form
+            className="rounded-lg border border-sidebar-border/60 bg-muted/20 p-3"
+            onSubmit={(e) => {
+                e.preventDefault();
+                form.post(`/dashboard/gallery/categories/${item.id}`, { preserveScroll: true });
+            }}
+        >
+            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
+                <input
+                    value={form.data.name_ar}
+                    onChange={(e) => form.setData('name_ar', e.target.value)}
+                    placeholder="Arabic name"
+                    required
+                    className="rounded-md border border-input bg-background px-3 py-2 text-sm"
+                />
+                <input
+                    value={form.data.name_en}
+                    onChange={(e) => form.setData('name_en', e.target.value)}
+                    placeholder="English name"
+                    required
+                    className="rounded-md border border-input bg-background px-3 py-2 text-sm"
+                    dir="ltr"
+                />
+                <input
+                    value={form.data.slug}
+                    onChange={(e) => form.setData('slug', e.target.value)}
+                    placeholder="slug (optional)"
+                    className="rounded-md border border-input bg-background px-3 py-2 text-sm font-mono text-xs"
+                    dir="ltr"
+                />
+                <input
+                    value={form.data.sort_order}
+                    onChange={(e) => form.setData('sort_order', Number(e.target.value))}
+                    type="number"
+                    min={0}
+                    className="rounded-md border border-input bg-background px-3 py-2 text-sm"
+                />
+                <label className="flex items-center gap-2 text-sm sm:col-span-2 lg:col-span-1">
+                    <input
+                        type="checkbox"
+                        checked={form.data.is_active}
+                        onChange={(e) => form.setData('is_active', e.target.checked)}
+                    />
+                    Active
+                </label>
+            </div>
+            <div className="mt-2 flex flex-wrap gap-2">
+                <button
+                    type="submit"
+                    disabled={form.processing}
+                    className="rounded-md bg-primary px-2.5 py-1 text-xs font-medium text-primary-foreground"
+                >
+                    Save
+                </button>
+                <button
+                    type="button"
+                    disabled={deleteForm.processing}
+                    onClick={() =>
+                        deleteForm.delete(`/dashboard/gallery/categories/${item.id}`, {
+                            preserveScroll: true,
+                        })
+                    }
+                    className="rounded-md border border-destructive/30 px-2.5 py-1 text-xs text-destructive"
+                >
+                    Delete
+                </button>
+            </div>
+        </form>
+    );
+}
+
+function AddCategoryForm() {
+    const form = useForm({
+        name_ar: '',
+        name_en: '',
+        slug: '',
+        sort_order: 0,
+        is_active: true,
+    });
+
+    return (
+        <form
+            className="rounded-xl border border-dashed border-sidebar-border/80 bg-muted/10 p-4"
+            onSubmit={(e) => {
+                e.preventDefault();
+                form.post('/dashboard/gallery/categories', {
+                    preserveScroll: true,
+                    onSuccess: () => form.reset(),
+                });
+            }}
+        >
+            <h3 className="text-sm font-semibold">Add category</h3>
+            <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-6">
+                <input
+                    value={form.data.name_ar}
+                    onChange={(e) => form.setData('name_ar', e.target.value)}
+                    placeholder="Arabic name *"
+                    required
+                    className="rounded-md border border-input bg-background px-3 py-2 text-sm"
+                />
+                <input
+                    value={form.data.name_en}
+                    onChange={(e) => form.setData('name_en', e.target.value)}
+                    placeholder="English name *"
+                    required
+                    className="rounded-md border border-input bg-background px-3 py-2 text-sm"
+                    dir="ltr"
+                />
+                <input
+                    value={form.data.slug}
+                    onChange={(e) => form.setData('slug', e.target.value)}
+                    placeholder="slug (auto if empty)"
+                    className="rounded-md border border-input bg-background px-3 py-2 text-sm font-mono text-xs"
+                    dir="ltr"
+                />
+                <input
+                    value={form.data.sort_order}
+                    onChange={(e) => form.setData('sort_order', Number(e.target.value))}
+                    type="number"
+                    min={0}
+                    className="rounded-md border border-input bg-background px-3 py-2 text-sm"
+                />
+                <label className="flex items-center gap-2 text-sm">
+                    <input
+                        type="checkbox"
+                        checked={form.data.is_active}
+                        onChange={(e) => form.setData('is_active', e.target.checked)}
+                    />
+                    Active
+                </label>
+                <button
+                    type="submit"
+                    disabled={form.processing}
+                    className="rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground"
+                >
+                    Add category
+                </button>
+            </div>
+        </form>
+    );
+}
+
+function GalleryRowForm({
+    item,
+    categories,
+}: {
+    item: GalleryRow;
+    categories: GalleryCategoryRow[];
+}) {
     const fileRef = useRef<HTMLInputElement>(null);
     const form = useForm({
         image: null as File | null,
         image_current: item.image,
+        gallery_category_id:
+            item.gallery_category_id != null ? String(item.gallery_category_id) : '',
         label_ar: item.label_ar ?? '',
         label_en: item.label_en ?? '',
         tagline_ar: item.tagline_ar ?? '',
@@ -143,6 +347,12 @@ function GalleryRowForm({ item }: { item: GalleryRow }) {
                         Leave empty to keep current file. Max ~8MB.
                     </p>
                 </div>
+                <CategorySelect
+                    categories={categories}
+                    value={form.data.gallery_category_id}
+                    onChange={(v) => form.setData('gallery_category_id', v)}
+                    className="md:col-span-2"
+                />
                 <input
                     value={form.data.label_ar}
                     onChange={(e) => form.setData('label_ar', e.target.value)}
@@ -213,11 +423,12 @@ function GalleryRowForm({ item }: { item: GalleryRow }) {
     );
 }
 
-export default function GalleryItemsIndex({ items }: PageProps) {
+export default function GalleryItemsIndex({ items, categories }: PageProps) {
     const { props } = usePage<PageProps>();
     const createFileRef = useRef<HTMLInputElement>(null);
     const createForm = useForm({
         image: null as File | null,
+        gallery_category_id: '',
         label_ar: '',
         label_en: '',
         tagline_ar: '',
@@ -240,6 +451,10 @@ export default function GalleryItemsIndex({ items }: PageProps) {
 
                 <div className="space-y-2 text-sm text-muted-foreground">
                     <p>
+                        <strong>Categories:</strong> create types (Modern, Classic, etc.). Each gallery image can
+                        belong to one category. Visitors filter the public gallery by category.
+                    </p>
+                    <p>
                         صور المعرض العامة: تظهر في <strong>/gallery</strong> حسب ترتيب العرض. العناوين الفارغة ترجع
                         لنمط Kitchen Project 01.
                     </p>
@@ -253,6 +468,20 @@ export default function GalleryItemsIndex({ items }: PageProps) {
                     </p>
                 </div>
 
+                <section className="space-y-4 rounded-xl border border-sidebar-border/70 bg-background/50 p-4">
+                    <h2 className="text-lg font-semibold">Gallery categories</h2>
+                    <AddCategoryForm />
+                    <div className="space-y-2">
+                        {categories.length === 0 ? (
+                            <p className="text-sm text-muted-foreground">
+                                No categories yet — add one above, then assign images below.
+                            </p>
+                        ) : (
+                            categories.map((c) => <CategoryRowForm key={c.id} item={c} />)
+                        )}
+                    </div>
+                </section>
+
                 <form
                     className="rounded-xl border border-sidebar-border/70 bg-background p-4"
                     onSubmit={(e) => {
@@ -262,6 +491,9 @@ export default function GalleryItemsIndex({ items }: PageProps) {
                             forceFormData: true,
                             onSuccess: () => {
                                 createForm.reset();
+                                createForm.setData('sort_order', 1);
+                                createForm.setData('gallery_category_id', '');
+                                createForm.setData('is_active', true);
                                 if (createFileRef.current) createFileRef.current.value = '';
                             },
                         });
@@ -285,6 +517,12 @@ export default function GalleryItemsIndex({ items }: PageProps) {
                                 />
                             </label>
                         </div>
+                        <CategorySelect
+                            categories={categories}
+                            value={createForm.data.gallery_category_id}
+                            onChange={(v) => createForm.setData('gallery_category_id', v)}
+                            className="md:col-span-2"
+                        />
                         <input
                             value={createForm.data.label_ar}
                             onChange={(e) => createForm.setData('label_ar', e.target.value)}
@@ -347,7 +585,7 @@ export default function GalleryItemsIndex({ items }: PageProps) {
 
                 <div className="space-y-3">
                     {items.map((item) => (
-                        <GalleryRowForm key={`${item.id}-${item.updated_at}`} item={item} />
+                        <GalleryRowForm key={`${item.id}-${item.updated_at}`} item={item} categories={categories} />
                     ))}
                 </div>
             </div>

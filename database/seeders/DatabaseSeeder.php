@@ -25,6 +25,7 @@ class DatabaseSeeder extends Seeder
         $this->call(HeroSlideSeeder::class);
         $this->call(BrandSeeder::class);
         $this->call(SiteServiceSeeder::class);
+        $this->call(GalleryCategorySeeder::class);
         $this->call(GalleryItemSeeder::class);
     }
 }

@@ -2,8 +2,10 @@
 
 namespace Database\Seeders;
 
+use App\Models\GalleryCategory;
 use App\Models\GalleryItem;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Schema;
 
 class GalleryItemSeeder extends Seeder
 {
@@ -39,6 +41,25 @@ class GalleryItemSeeder extends Seeder
                     'is_active' => true,
                 ]
             );
+        }
+
+        if (Schema::hasTable('gallery_categories') && Schema::hasColumn('gallery_items', 'gallery_category_id')) {
+            $catIds = GalleryCategory::query()
+                ->orderBy('sort_order')
+                ->orderBy('id')
+                ->pluck('id')
+                ->all();
+            if ($catIds !== []) {
+                GalleryItem::query()
+                    ->orderBy('sort_order')
+                    ->orderBy('id')
+                    ->get()
+                    ->each(function (GalleryItem $item, int $idx) use ($catIds): void {
+                        $item->update([
+                            'gallery_category_id' => $catIds[$idx % count($catIds)],
+                        ]);
+                    });
+            }
         }
     }
 }
